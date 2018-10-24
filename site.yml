@@ -29,9 +29,19 @@
         id: 1655A0AB68576280
         keyserver: keyserver.ubuntu.com
 
+    - name: Add mongodb repo key
+      apt_key:
+        id: 68818C72E52529D4
+        keyserver: keyserver.ubuntu.com
+
     - name: Add node repo
       apt_repository:
-        repo: deb https://deb.nodesource.com/node_8.x stretch main
+        repo: deb https://deb.nodesource.com/node_10.x stretch main
+        state: present
+
+    - name: Add mongodb repo
+      apt_repository:
+        repo: deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/4.0 main
         state: present
 
     - name: Upgrade debian
@@ -39,7 +49,7 @@
         update_cache: true
         upgrade: true
 
-- hosts: bn
+- hosts: m
   remote_user: root
   tasks:
 
@@ -52,7 +62,18 @@
         - net-tools
         - aptitude
         - screen
-        - node
-      
+        - nodejs
+        - mongodb-org
+
+    - name: Configure mongodb
+      template:
+        src: files/mongod.conf
+        dest: /etc/mongod.conf
+
+    - name: Enable mongod
+      systemd:
+        name: mongod
+        state: restarted
+        
 
 # vim: ts=4 et nowrap autoindent
