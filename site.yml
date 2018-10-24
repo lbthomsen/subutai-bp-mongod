@@ -1,0 +1,58 @@
+# Ansible Playbook for Subutai Blockchain II blueprint
+#
+# Implemented by Lars Boegild Thomsen <lbthomsen@gmail.com>
+#
+---
+
+- hosts: all
+  remote_user: root
+
+  tasks:
+
+    - name: Disable dpkg fsync
+      shell: echo force-unsafe-io > /etc/dpkg/dpkg.cfg.d/unsafe-io
+      args: 
+        creates: /etc/dpkg/dpkg.cfg.d/unsafe-io
+
+    - name: Install dirmngr
+      apt:
+        name: dirmngr
+        state: present
+
+    - name: Install apt-transport-https
+      apt:
+        name: apt-transport-https
+        state: present
+
+    - name: Add node repo key
+      apt_key:
+        id: 1655A0AB68576280
+        keyserver: keyserver.ubuntu.com
+
+    - name: Add node repo
+      apt_repository:
+        repo: deb https://deb.nodesource.com/node_8.x stretch main
+        state: present
+
+    - name: Upgrade debian
+      apt:
+        update_cache: true
+        upgrade: true
+
+- hosts: bn
+  remote_user: root
+  tasks:
+
+    - name: Install required debs
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items: 
+        - sudo
+        - net-tools
+        - aptitude
+        - screen
+        - node
+      
+
+# vim: ts=4 et nowrap autoindent
